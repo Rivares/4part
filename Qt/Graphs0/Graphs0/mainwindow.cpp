@@ -213,7 +213,7 @@ void MainWindow::recountPixels()
 {
     onePixelX = 540.0/(rightX-leftX);
     onePixelY = 370.0/(rightY-leftY);
-    Ox = fabs(leftX); Oy = fabs(rightY);
+    Ox = fabs(leftX); Oy = rightY;
 }
 
 void MainWindow::getData()
@@ -235,28 +235,34 @@ void MainWindow::drawGraph(bool notEmpty)
     paint.begin(&graph);
     paint.eraseRect(0,0,540,370);
 
-    if (!state)
-    {   paint.setPen(QPen(Qt::black,3));
-        paint.drawLine(0, 365, 540, 365); // Axis X
-        paint.drawLine(5, 0, 5, 370); // Axis Y
+    paint.setPen(QPen(Qt::black,3));
+    paint.drawLine(0, 365, 540, 365);   // Axis X
+    paint.drawLine(5, 0, 5, 370);       // Axis Y
 
-        paint.setPen(QPen(Qt::black,1));
-        getData();
-        recountPixels();
+    getData();
+    recountPixels();
 
-        for(double i = leftX; i <= rightX; i+=10.0)
-            //paint.drawLine(buff_x0+i+5, buff_y0-10, buff_x1+i+5, buff_y1); // Axis X
-            paint.drawLine((i+Ox)*onePixelX, (Oy)*onePixelY, (i+Ox)*onePixelX, (Oy-5)*onePixelY); //????????????????
+    // Draw axises on the map
+    paint.setPen(QPen(Qt::black,1));
+    short scaleX = 102*onePixelX, scaleY = 20*onePixelY;//??????????????????????????????????????????????????????????
 
-        for(double i = leftY; i<= rightY; i+=10.0)
-            //paint.drawLine(buff_x0+10, buff_y0-i-5, buff_x1, buff_y1-i-5); // Axis Y
-            paint.drawLine(Ox*onePixelX, (Oy-i)*onePixelY, (Ox+20)*onePixelX, (Oy-i)*onePixelY);
+    for(double i = leftX+20; i <= rightX; i+=20.0)
+        paint.drawLine((i+Ox)*onePixelX, Oy*onePixelY, (i+Ox)*onePixelX, (Oy-scaleX)*onePixelY);    // Axis X
 
-        state = true;
-    }
+    for(double i = leftY; i<= rightY; i+=10.0)
+       paint.drawLine(Ox*onePixelX, (Oy-i)*onePixelY, (Ox+scaleY)*onePixelX, (Oy-i)*onePixelY);    // Axis Y
 
-//??????????????????????????????????????????????????????????
+    // Draw a grid on the map
+    paint.setPen(QPen(Qt::gray, 0.4, Qt::DashLine));
+    scaleX = 180, scaleY = 1000;//??????????????????????????????????????????????????????????
 
+    for(double i = leftX+20; i <= rightX; i+=20.0)
+        paint.drawLine((i+Ox)*onePixelX, Oy*onePixelY, (i+Ox)*onePixelX, (Oy-scaleX)*onePixelY);    // Axis X
+
+    for(double i = leftY; i<= rightY; i+=10.0)
+        paint.drawLine(Ox*onePixelX, (Oy-i)*onePixelY, (Ox+scaleY)*onePixelX, (Oy-i)*onePixelY);    // Axis Y
+
+/*
     // Draw points on the map
     paint.setPen(QPen(Qt::black,2));
 
@@ -267,7 +273,7 @@ void MainWindow::drawGraph(bool notEmpty)
 
     //  + Grid!
 
-//??????????????????????????????????????????????????????????
+*/
 
 
     if(!notEmpty) {
