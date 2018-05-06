@@ -7,7 +7,6 @@
 
 using namespace std;
 
-#define defaultH 0.5
 #define dt 1    // dt = 3;  //dt = 1; - it's perfect!
 
 namespace Ui {
@@ -27,12 +26,12 @@ public:
     void recountPixels();
     void getData();
 
-    typedef double (MainWindow::*bMM)(double i, short j);   // Function Pointer
+    typedef double (MainWindow::*bMM)(unsigned long long i, uint j);   // Function Pointer
     bMM MM[4];     // Functions Pointer
-    double bTV(double i, short j);
-    double bTF(double i, short j);
-    double bCV(double i, short j);
-    double bCF(double i, short j);
+    double bTV(unsigned long long i, uint j);
+    double bTF(unsigned long long i, uint j);
+    double bCV(unsigned long long i, uint j);
+    double bCF(unsigned long long i, uint j);
     
 private slots:
     void on_exit_clicked();

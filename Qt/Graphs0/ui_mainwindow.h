@@ -99,6 +99,9 @@ public:
     QLineEdit *valF2;
     QLineEdit *valF1;
     QLineEdit *valF3;
+    QFrame *line_7;
+    QLabel *label_8;
+    QLineEdit *selectStep;
     QMenuBar *menuBar;
     QMenu *menu;
     QStatusBar *statusBar;
@@ -107,7 +110,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(849, 532);
+        MainWindow->resize(849, 548);
         action = new QAction(MainWindow);
         action->setObjectName(QStringLiteral("action"));
         action_3 = new QAction(MainWindow);
@@ -142,12 +145,12 @@ public:
         label_13->setGeometry(QRect(140, 450, 111, 20));
         line_2 = new QFrame(centralWidget);
         line_2->setObjectName(QStringLiteral("line_2"));
-        line_2->setGeometry(QRect(560, 10, 331, 16));
+        line_2->setGeometry(QRect(560, 10, 281, 20));
         line_2->setFrameShape(QFrame::HLine);
         line_2->setFrameShadow(QFrame::Sunken);
         verticalLayoutWidget_2 = new QWidget(centralWidget);
         verticalLayoutWidget_2->setObjectName(QStringLiteral("verticalLayoutWidget_2"));
-        verticalLayoutWidget_2->setGeometry(QRect(580, 30, 251, 460));
+        verticalLayoutWidget_2->setGeometry(QRect(580, 30, 251, 461));
         verticalLayout_4 = new QVBoxLayout(verticalLayoutWidget_2);
         verticalLayout_4->setSpacing(6);
         verticalLayout_4->setContentsMargins(11, 11, 11, 11);
@@ -446,17 +449,17 @@ public:
         valV1->setReadOnly(true);
         valV2 = new QLineEdit(centralWidget);
         valV2->setObjectName(QStringLiteral("valV2"));
-        valV2->setGeometry(QRect(350, 420, 61, 20));
+        valV2->setGeometry(QRect(330, 420, 61, 20));
         valV2->setMaximumSize(QSize(100, 16777215));
         valV2->setReadOnly(true);
         valV3 = new QLineEdit(centralWidget);
         valV3->setObjectName(QStringLiteral("valV3"));
-        valV3->setGeometry(QRect(440, 420, 61, 20));
+        valV3->setGeometry(QRect(400, 420, 61, 20));
         valV3->setMaximumSize(QSize(100, 16777215));
         valV3->setReadOnly(true);
         valF2 = new QLineEdit(centralWidget);
         valF2->setObjectName(QStringLiteral("valF2"));
-        valF2->setGeometry(QRect(350, 450, 61, 20));
+        valF2->setGeometry(QRect(330, 450, 61, 20));
         valF2->setMaximumSize(QSize(100, 16777215));
         valF2->setReadOnly(true);
         valF1 = new QLineEdit(centralWidget);
@@ -466,13 +469,24 @@ public:
         valF1->setReadOnly(true);
         valF3 = new QLineEdit(centralWidget);
         valF3->setObjectName(QStringLiteral("valF3"));
-        valF3->setGeometry(QRect(440, 450, 61, 20));
+        valF3->setGeometry(QRect(400, 450, 61, 20));
         valF3->setMaximumSize(QSize(100, 16777215));
         valF3->setReadOnly(true);
+        line_7 = new QFrame(centralWidget);
+        line_7->setObjectName(QStringLiteral("line_7"));
+        line_7->setGeometry(QRect(10, 10, 551, 20));
+        line_7->setFrameShape(QFrame::HLine);
+        line_7->setFrameShadow(QFrame::Sunken);
+        label_8 = new QLabel(centralWidget);
+        label_8->setObjectName(QStringLiteral("label_8"));
+        label_8->setGeometry(QRect(480, 420, 91, 41));
+        selectStep = new QLineEdit(centralWidget);
+        selectStep->setObjectName(QStringLiteral("selectStep"));
+        selectStep->setGeometry(QRect(490, 470, 71, 21));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 849, 21));
+        menuBar->setGeometry(QRect(0, 0, 849, 20));
         menu = new QMenu(menuBar);
         menu->setObjectName(QStringLiteral("menu"));
         MainWindow->setMenuBar(menuBar);
@@ -537,6 +551,8 @@ public:
         valF2->setText(QApplication::translate("MainWindow", "0.0", 0));
         valF1->setText(QApplication::translate("MainWindow", "0.0", 0));
         valF3->setText(QApplication::translate("MainWindow", "0.0", 0));
+        label_8->setText(QApplication::translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">\320\250\320\260\320\263</span></p><p align=\"center\"><span style=\" font-weight:600;\">\320\264\320\270\321\201\320\272\321\200\320\265\321\202\320\270\320\267\320\260\321\206\320\270\320\270:</span></p></body></html>", 0));
+        selectStep->setText(QApplication::translate("MainWindow", "0.01", 0));
         menu->setTitle(QApplication::translate("MainWindow", "\320\244\320\260\320\271\320\273", 0));
     } // retranslateUi
 

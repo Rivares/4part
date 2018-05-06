@@ -6,6 +6,7 @@
 #include <vector>
 #include <cmath>
 #include <map>
+#include <omp.h>
 #include <array>
 #include <vector>
 #include <thread>
@@ -22,27 +23,29 @@
 
 using namespace std;
 
-bool ok;
-static bool notEmpty;
+static bool okey = Q_NULLPTR;
+static bool notEmpty = 0;
+static double defaultH = 0.0;
 static unsigned int selectZ;
-static unsigned int selectN;
+static unsigned long long selectN;
 static double stepN;
-map <string,double> Sizes = {{ "windowSizeX", 540 },
-                             { "windowSizeY", 370 },
-                             { "axisX_x1", 0 },
-                             { "axisX_y1", 343 },
-                             { "axisX_x2", 540 },
-                             { "axisX_y2", 343 },
-                             { "axisY_x1", 28 },
-                             { "axisY_y1", 0 },
-                             { "axisY_x2", 28 },
-                             { "axisY_y2", 370 },
-                            };
+static map <string, int> Sizes = {{ "windowSizeX", 540 },
+                                     { "windowSizeY", 370 },
+                                     { "axisX_x1", 0 },
+                                     { "axisX_y1", 343 },
+                                     { "axisX_x2", 540 },
+                                     { "axisX_y2", 343 },
+                                     { "axisY_x1", 28 },
+                                     { "axisY_y1", 0 },
+                                     { "axisY_x2", 28 },
+                                     { "axisY_y2", 370 },
+                                    };
 
-double initLayerTV_0 = 160, initLayerTV_1 = 147.99;
-double initLayerTF_0 = 120.37, initLayerTF_1 = 132.39;
-double initLayerCV_0 = 67.94, initLayerCV_1 = 72.04;
-double initLayerCF_0 = 6.5, initLayerCF_1 = 2.78;
+static double dRC = 1.4;
+const double initLayerTV_0 = 160, initLayerTV_1 = 147.99;
+const double initLayerTF_0 = 120.37, initLayerTF_1 = 132.39;
+const double initLayerCV_0 = 67.94, initLayerCV_1 = 72.04;
+const double initLayerCF_0 = 6.5, initLayerCF_1 = 2.78;
 static bool state = false;
 
 //----------Petrtubation----------//    Temperature(min:???; maxHeat:???), gas flow or pressure differential?
@@ -51,13 +54,13 @@ static double P_TF = 0;
 static double P_CV = 0;
 static double P_CF = 0;
 
-void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF); // Would be relize as template
+void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF);
 void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF,
                  bool turnOn);
 void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF,
                  vector <vector <double> > &CV, vector <vector <double> > &CF);
 
-void initialLayerTV(vector <vector <double> > &TV);
+void initialLayerTV(vector <vector <double> > &TV);         // Would be relize as template
 void initialLayerTF(vector <vector <double> > &TF);
 void initialLayerCV(vector <vector <double> > &CV);
 void initialLayerCF(vector <vector <double> > &CF);
@@ -80,8 +83,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->setupUi(this);
         ui->inputLeftX->setReadOnly(true);
 
-        selectZ = (short)(ui->CouiceZspinBox->value() + 2);
-        selectN = ui->inputRightX->text().toUInt(&ok, 10);
+        selectZ = static_cast <unsigned int> (ui->CouiceZspinBox->value() + 2);
+        selectN = ui->inputRightX->text().toULongLong(&okey, 10);
+        defaultH = dRC/(selectZ-2);                                     // dRC = 1.4m
 
         state = false;
 
@@ -107,32 +111,33 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-double MainWindow::bTV(double i, short j)
+double MainWindow::bTV(unsigned long long i, uint j)
 {
-    return TV[UINT(i)][j];
+    return TV[static_cast <size_t> (i)][j];
 }
 
-double MainWindow::bTF(double i, short j)
+double MainWindow::bTF(unsigned long long i, uint j)
 {
-    return TF[UINT(i)][j];
+    return TF[static_cast <size_t> (i)][j];
 }
 
-double MainWindow::bCV(double i, short j)
+double MainWindow::bCV(unsigned long long i, uint j)
 {
-    return CV[UINT(i)][j];
+    return CV[static_cast <size_t> (i)][j];
 }
 
-double MainWindow::bCF(double i, short j)
+double MainWindow::bCF(unsigned long long i, uint j)
 {
-    return CF[UINT(i)][j];
+    return CF[static_cast <size_t> (i)][j];
 }
 
 
 void MainWindow::recountPixels()
 {
-    onePixelX = (Sizes["windowSizeX"]-Sizes["axisY_x1"]) / (rightX-leftX);
-    onePixelY = Sizes["axisX_y1"]/(rightY-leftY);
-    Ox = fabs(leftX+Sizes["axisY_x1"]); Oy = fabs(rightY);                // Nothing!!!
+    onePixelX = (Sizes["windowSizeX"] - Sizes["axisY_x1"]) / (rightX-leftX);
+    onePixelY = Sizes["axisX_y1"]  /(rightY - leftY);
+    Ox = fabs(leftX + Sizes["axisY_x1"]); Oy = fabs(rightY);                // Nothing!!!
+    ui->selectStep->setText(QString::fromStdString(std::to_string(step)));
 }
 
 void MainWindow::getData()
@@ -141,9 +146,9 @@ void MainWindow::getData()
     rightX = ui->inputRightX->text().toDouble();
     leftY = ui->inputLeftY->text().toDouble();
     rightY = ui->inputRightY->text().toDouble();
-    selectN = ui->inputRightX->text().toUInt(&ok, 10);
+    selectN = ui->inputRightX->text().toULongLong(&okey, 10);
 
-    step = 0.01;
+    step = (ui->selectStep->text().toDouble() <= 0.0)? 0.01 : abs(ui->selectStep->text().toDouble());
 }
 
 void MainWindow::drawGraph(bool notEmpty)
@@ -154,7 +159,7 @@ void MainWindow::drawGraph(bool notEmpty)
     QPixmap graph(Sizes["windowSizeX"], Sizes["windowSizeY"]);
     QPainter paint;
     paint.begin(&graph);
-    paint.eraseRect(0,0,Sizes["windowSizeX"],Sizes["windowSizeX"]);
+    paint.eraseRect(0, 0, Sizes["windowSizeX"], Sizes["windowSizeX"]);
 
     // Draw axises on the map
     paint.setPen(QPen(Qt::black,3));
@@ -164,23 +169,23 @@ void MainWindow::drawGraph(bool notEmpty)
     getData();
     recountPixels();
 
-    short scaleX = Sizes["axisX_y1"], scaleY = Sizes["axisY_x1"];
+    int scaleX = Sizes["axisX_y1"], scaleY = Sizes["axisY_x1"];
     double stepY = onePixelY;
 
     //--------------------------------------------------------------------------
 
     // Draw control of points on the map
-    paint.setPen(QPen(Qt::black,1));
+    paint.setPen(QPen(Qt::black, 1));
 
     #pragma omp parallel sections       // parallel's sections
     {
         #pragma omp section
         for(double i = scaleY; i <= Sizes["axisX_x2"]; i += ( (Sizes["windowSizeX"]-Sizes["axisY_x1"]) / 10.0 ))
-            paint.drawLine(i, (scaleX-6), i, (scaleX+6));
+            paint.drawLine(static_cast <int> (i), (scaleX-6), static_cast <int> (i), (scaleX+6));
 
         #pragma omp section
         for(double i = scaleX; i >= Sizes["axisY_y1"]; i -= (stepY*4.0))
-            paint.drawLine((scaleY-6), i, (scaleY+6), i);
+            paint.drawLine((scaleY-6), static_cast <int> (i), (scaleY+6), static_cast <int> (i));
     }
 
     //--------------------------------------------------------------------------
@@ -192,11 +197,11 @@ void MainWindow::drawGraph(bool notEmpty)
     {
         #pragma omp section
         for(double i = scaleY; i <= Sizes["axisX_x2"]; i += ( (Sizes["windowSizeX"]-Sizes["axisY_x1"]) / 10.0 ))
-            paint.drawLine(i, Sizes["axisX_y1"], i, Sizes["axisY_y1"]);
+            paint.drawLine(static_cast <int> (i), Sizes["axisX_y1"], static_cast <int> (i), Sizes["axisY_y1"]);
 
         #pragma omp section
         for(double i = scaleX; i >= Sizes["axisY_y1"]; i -= (stepY*4.0))
-            paint.drawLine(Sizes["axisX_x2"], i, Sizes["axisY_x2"], i);
+            paint.drawLine(Sizes["axisX_x2"], static_cast <int> (i), Sizes["axisY_x2"], static_cast <int> (i));
     }
 
     //--------------------------------------------------------------------------
@@ -205,6 +210,7 @@ void MainWindow::drawGraph(bool notEmpty)
 
     if(!notEmpty)
     {
+        notEmpty = 1;
         ui->outputGraph->setPixmap(graph);
         return;
     }
@@ -236,43 +242,43 @@ void MainWindow::drawGraph(bool notEmpty)
 
     // Out to display steady-state value temperature
     if((ui->Hexch->isChecked()) || (ui->LHM->isChecked())) {
-        QString str = QString::number(TV[selectN-1][1]);
+        QString str = QString::number(TV[static_cast <size_t> (selectN-1)][1]);
         ui->valV1->setText(str);
 
-        str = QString::number(TV[selectN-1][(selectZ-1)/2]);
+        str = QString::number(TV[static_cast <size_t> (selectN-1)][(selectZ-1) / 2]);
         ui->valV2->setText(str);
 
-        str = QString::number(TV[selectN-1][selectZ-2]);
+        str = QString::number(TV[static_cast <size_t> (selectN-1)][selectZ-2]);
         ui->valV3->setText(str);
     //----------------------------------------------------------------------
-        str = QString::number(TF[selectN-1][1]);
+        str = QString::number(TF[static_cast <size_t> (selectN-1)][1]);
         ui->valF1->setText(str);
 
-        str = QString::number(TF[selectN-1][(selectZ-1)/2]);
+        str = QString::number(TF[static_cast <size_t> (selectN-1)][(selectZ-1) / 2]);
         ui->valF2->setText(str);
 
-        str = QString::number(TF[selectN-1][selectZ-2]);
+        str = QString::number(TF[static_cast <size_t> (selectN-1)][selectZ-2]);
         ui->valF3->setText(str);
     }
 
     // Out to display steady-state concentration of absorbent
     if(ui->Mexch->isChecked()) {
-        QString str = QString::number(CV[selectN-1][1]);
+        QString str = QString::number(CV[static_cast <size_t> (selectN-1)][1]);
         ui->valV1->setText(str);
 
-        str = QString::number(CV[selectN-1][(selectZ-1)/2]);
+        str = QString::number(CV[static_cast <size_t> (selectN-1)][(selectZ-1) / 2]);
         ui->valV2->setText(str);
 
-        str = QString::number(CV[selectN-1][selectZ-2]);
+        str = QString::number(CV[static_cast <size_t> (selectN-1)][selectZ-2]);
         ui->valV3->setText(str);
     //----------------------------------------------------------------------
-        str = QString::number(CF[selectN-1][1]);
+        str = QString::number(CF[static_cast <size_t> (selectN-1)][1]);
         ui->valF1->setText(str);
 
-        str = QString::number(CF[selectN-1][(selectZ-1)/2]);
+        str = QString::number(CF[static_cast <size_t> (selectN-1)][(selectZ-1) / 2]);
         ui->valF2->setText(str);
 
-        str = QString::number(CF[selectN-1][selectZ-2]);
+        str = QString::number(CF[static_cast <size_t> (selectN-1)][selectZ-2]);
         ui->valF3->setText(str);
     }
 
@@ -281,9 +287,7 @@ void MainWindow::drawGraph(bool notEmpty)
     clock_t timeDiff = clock() - timeMW_1;
     msec = timeDiff * 1000 / CLOCKS_PER_SEC;
     cout << endl <<"Drawing time of program taken " << msec/1000 << " seconds, and " << msec%1000 <<" milliseconds!" << endl;
-
     return;
-
 }
 
 void MainWindow::on_exit_clicked()
@@ -344,18 +348,31 @@ void MainWindow::draw_Model(QPixmap *graph, int choiceModel)
                             }
                 }
 
-                for(double i = (double)stepN; i <= (double)rightX; i+=step)
+                for(double i = stepN; i <= rightX; i += step)
                 {
-                    if(!isnan(((this->*MM[choiceModel])(i, j))))
+                    if(!isnan(((this->*MM[choiceModel])(static_cast <unsigned long long> (i), j))))
                     {
                         if(mode)                                // Set begin of point
                         {
-                            path.moveTo((i*onePixelX)+shift, (Oy-((this->*MM[choiceModel])(i, j)))*onePixelY);
+                            path.moveTo((i*onePixelX)+shift, (Oy-((this->*MM[choiceModel])(static_cast <unsigned long long> (i), j)))*onePixelY);
                             mode = false;
                         }
                         else
-                            path.lineTo((i*onePixelX)+shift,(Oy-((this->*MM[choiceModel])(i, j)))*onePixelY);
+                            path.lineTo((i*onePixelX)+shift,(Oy-((this->*MM[choiceModel])(static_cast <unsigned long long> (i), j)))*onePixelY);
                     }
+
+                    // For endless modeling. As path has maximum size elements type data is INTeger(around 2 147 483 647 * 2)
+                    // then we  increase this number to endless.
+                    if(path.elementCount() > ((pow((pow(2, 8)), sizeof(int))/1000) - pow(10, 6)) )
+                    {
+                        double buf_x = path.currentPosition().rx(), buf_y = path.currentPosition().ry();    // to buffer
+
+                        paint.drawPath(path);                   // Drew
+                        path = QPainterPath();                  // Clear path
+
+                        path.moveTo(buf_x, buf_y);              // We start drawing from this place
+                    }
+
                 }
 
                 paint.drawPath(path);
@@ -387,18 +404,28 @@ void MainWindow::draw_Model(QPixmap *graph, int choiceModel)
                             }
                 }
 
-                for(double i = (double)stepN; (i <= (double)rightX); i+=step)
+                for(double i = stepN; (i <= rightX); i+=step)
                 {
-                    if(!isnan((this->*MM[choiceModel+1])(i, j)))
+                    if(!isnan((this->*MM[choiceModel+1])(static_cast <unsigned long long> (i), j)))
                     {
                         if(mode)
                         {
-                            path1.moveTo((i*onePixelX)+shift,(Oy-((this->*MM[choiceModel+1])(i, j)))*onePixelY);
+                            path1.moveTo((i*onePixelX)+shift,(Oy-((this->*MM[choiceModel+1])(static_cast <unsigned long long> (i), j)))*onePixelY);
                             mode = false;
                         }
                         else
-                            path1.lineTo((i*onePixelX)+shift,(Oy-((this->*MM[choiceModel+1])(i, j)))*onePixelY);
+                            path1.lineTo((i*onePixelX)+shift,(Oy-((this->*MM[choiceModel+1])(static_cast <unsigned long long> (i), j)))*onePixelY);
                      }
+
+                    if(path1.elementCount() > ((pow((pow(2, 8)), sizeof(int))/1000) - pow(10, 6)) )
+                    {
+                        double buf_x = path1.currentPosition().rx(), buf_y = path1.currentPosition().ry();
+
+                        paint.drawPath(path1);
+                        path1 = QPainterPath();
+
+                        path1.moveTo(buf_x, buf_y);
+                    }
                 }
 
                 paint.drawPath(path1);
@@ -406,6 +433,7 @@ void MainWindow::draw_Model(QPixmap *graph, int choiceModel)
 
                 path1.moveTo(stepN*onePixelX,(Oy-((this->*MM[choiceModel+1])(0, j+1)))*onePixelY);
             }
+
         }
     }
 
@@ -415,7 +443,7 @@ void MainWindow::draw_Model(QPixmap *graph, int choiceModel)
 
     vector<double> ProcessPoints;
 
-    uint tmp_var = 0;
+    size_t tmp_var = 0;
     for(tmp_var = 0; tmp_var < (selectZ-2); ++tmp_var)
     {
         ProcessPoints.push_back((this->*MM[choiceModel])(0, tmp_var+1));
@@ -440,17 +468,17 @@ void MainWindow::draw_Model(QPixmap *graph, int choiceModel)
     painter.drawText(QPoint(505, 360), "t,sec" );
 
     tmp_var = 72;                                                       // tmp_var = 72 it's reference point
-    for (uint i = 0; i < 5; ++i, tmp_var+=102.05)
-        painter.drawText(QPoint(tmp_var, 360), QString::number(TimePoints[i], 'g', 5));
+    for (size_t i = 0; i < 5; ++i, tmp_var += 102.05)
+        painter.drawText(QPoint(static_cast <int> (tmp_var), 360), QString::number(TimePoints[i], 'g', 5));
 
     // Draw processes points
     QFont serifFont("Times", 7, QFont::Normal);
     painter.setFont(serifFont);
     for (tmp_var = 0; tmp_var < (selectZ-2); ++tmp_var)
-        painter.drawText(QPoint(0.5, (Oy-((this->*MM[choiceModel])(0, tmp_var+1)))*onePixelY-2), QString::number(ProcessPoints[tmp_var], 'g', 5));
+        painter.drawText(QPoint(0, static_cast <int> ((Oy-((this->*MM[choiceModel])(0, tmp_var+1)))*onePixelY-2)), QString::number(ProcessPoints[tmp_var], 'g', 5));
 
-    for (uint i = tmp_var, tmp_var = 0; tmp_var < (selectZ-2); ++tmp_var, ++i)
-        painter.drawText(QPoint(0.5, (Oy-((this->*MM[choiceModel+1])(0, tmp_var+1)))*onePixelY-2), QString::number(ProcessPoints[i], 'g', 5));
+    for (size_t i = tmp_var, tmp_var = 0; tmp_var < (selectZ-2); ++tmp_var, ++i)
+        painter.drawText(QPoint(0, static_cast <int> ((Oy-((this->*MM[choiceModel+1])(0, tmp_var+1)))*onePixelY-2)), QString::number(ProcessPoints[i], 'g', 5));
 
 }
 
@@ -579,7 +607,7 @@ void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF,
             PTV_L = (a0 * 273.15 * dt) / defaultH, PTV_N = 0, PTF = (0.0002291314 * dt) / defaultH;
 
     // -----Model's mass exchenger parameters------
-    double RvM = 0.004302, RfM = 0.00001222, E = 0.000000001;
+    double RvM = 0.004302, RfM = 0.00001222, E = 0.000000001; //RfM = 0.000010734; RvM = 0.0216487318
 
     vector <double> bmp;
     bmp.assign(selectZ, 0);
@@ -587,7 +615,7 @@ void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF,
     if(!TV.empty())
     {
         #pragma omp parallel for ordered num_threads(4)
-        for (unsigned int i = 0; i < selectN; ++i)
+        for (unsigned long long i = 0; i < selectN; ++i)
         {
             #pragma omp ordered
             TV.erase(TV.begin(), TV.end());
@@ -598,7 +626,7 @@ void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF,
     }
 
     #pragma omp parallel for ordered num_threads(4)
-    for (unsigned int i = 0; i < selectN; ++i)
+    for (unsigned long long i = 0; i < selectN; ++i)
     {
         #pragma omp ordered
         TV.push_back(bmp);
@@ -619,9 +647,9 @@ void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF,
 
     // Calculate model
     #pragma omp parallel for ordered num_threads(4)
-    for(uint i = 1; i < selectN; ++i)   // n: t
+    for(size_t i = 1; i < selectN; ++i)   // n: t
     {
-       for(uint j = 1; j < (selectZ-1); ++j)  // i: z
+       for(size_t j = 1; j < (selectZ-1); ++j)  // i: z
        {
            #pragma omp ordered
            // -----Calculate layer heat exchenger model------
@@ -652,7 +680,7 @@ void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF)
     if(!TV.empty())
     {
         #pragma omp parallel for ordered num_threads(2)
-        for (unsigned int i = 0; i < selectN; ++i)
+        for (unsigned long long i = 0; i < selectN; ++i)
         {
             #pragma omp ordered
             TV.erase(TV.begin(), TV.end());
@@ -661,7 +689,7 @@ void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF)
     }
 
     #pragma omp parallel for ordered num_threads(4)
-    for (unsigned int i = 0; i < selectN; ++i)
+    for (unsigned long long i = 0; i < selectN; ++i)
     {
         #pragma omp ordered
         TV.push_back(bmp);
@@ -674,9 +702,10 @@ void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF)
     threadInitialLayerTV.join();
     threadInitialLayerTF.join();
 
+
     // Calculate model
     #pragma omp parallel for ordered num_threads(4)
-    for(uint i = 1; i < selectN; ++i)   // n: t
+    for(size_t i = 1; i < selectN; ++i)   // n: t
     {
        for(uint j = 1; j < (selectZ-1); ++j)  // i: z
        {
@@ -705,7 +734,7 @@ void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF, b
     if(!TV.empty())
     {
         #pragma omp parallel for ordered num_threads(2)
-        for (unsigned int i = 0; i < selectN; ++i)
+        for (unsigned long long i = 0; i < selectN; ++i)
         {
             #pragma omp ordered
             TV.erase(TV.begin(), TV.end());
@@ -714,7 +743,7 @@ void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF, b
     }
 
     #pragma omp parallel for ordered num_threads(4)
-    for (unsigned int i = 0; i < selectN; ++i)
+    for (unsigned long long i = 0; i < selectN; ++i)
     {
         #pragma omp ordered
         TV.push_back(bmp);
@@ -729,7 +758,7 @@ void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF, b
 
     // Calculate model
     #pragma omp parallel for ordered num_threads(4)
-    for(uint i = 1; i < selectN; ++i)   // n: t
+    for(size_t i = 1; i < selectN; ++i)   // n: t
     {
        for(uint j = 1; j < (selectZ-1); ++j)  // i: z
        {
@@ -746,145 +775,127 @@ void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF, b
 void initialLayerTV(vector <vector <double> > &TV)
 {
     double *initLayerTV = new double [selectZ];
+    double stepInit = 0.0;
+    size_t i = 0;
 
-    #pragma omp parallel for num_threads(4)
-    for(uint i = 0; i < selectN; ++i)
+    #pragma omp parallel for num_threads(2)
+    for(i = 0; i < selectN; ++i)
     {
         TV[i][0] = initLayerTV_0;
-        initLayerTV[0] = initLayerTV_0;
         TV[i][selectZ-1] = initLayerTV_1;
     }
 
-    uint i = 0;
-    double tmp = 0.0;
-    double stepInit = 0.0;
+    stepInit = abs(initLayerTV_0 - initLayerTV_1)/(selectZ-2);
 
-    stepInit = abs(initLayerTV_0-initLayerTV_1)/(selectZ-2);
-    tmp = initLayerTV_0-stepInit;
+    initLayerTV[0] = initLayerTV_0;
     initLayerTV[1] = initLayerTV_0;
     initLayerTV[selectZ-1] = initLayerTV_1;
 
-    #pragma omp parallel for num_threads(2)
     for(i = 2; i < selectZ; ++i)
     {
-        initLayerTV[i] = tmp;
-        tmp -= stepInit;
+        initLayerTV[i] = initLayerTV[i-1] - stepInit;
     }
 
     #pragma omp parallel for num_threads(2)
-    for(uint i = 0; i < selectZ; i++)
+    for(i = 0; i < selectZ; ++i)
     {
         TV[0][i] = initLayerTV[i];
+        //printf("Thread %d\n", omp_get_thread_num());
     }
-
 }
 
 void initialLayerTF(vector <vector <double> > &TF)
 {
     double *initLayerTF = new double [selectZ];
+    double stepInit = 0.0;
+    size_t i = 0;
 
-    #pragma omp parallel for num_threads(4)
-    for(uint i = 0; i < selectN; i++)
+    #pragma omp parallel for num_threads(2)
+    for(i = 0; i < selectN; ++i)
     {
         TF[i][0] = initLayerTF_0;
-        initLayerTF[0] = initLayerTF_0;
         TF[i][selectZ-1] = initLayerTF_1;
     }
 
-    uint i = 0;
-    double tmp = 0.0;
-    double stepInit = 0.0;
+    stepInit = abs(initLayerTF_0 - initLayerTF_1)/(selectZ-2);
 
-    stepInit = abs(initLayerTF_0-initLayerTF_1)/(selectZ-2);
-    tmp = initLayerTF_0+stepInit;
+    initLayerTF[0] = initLayerTF_0;
     initLayerTF[1] = initLayerTF_0;
     initLayerTF[selectZ-1] = initLayerTF_1;
 
-    #pragma omp parallel for num_threads(2)
     for(i = 2; i < selectZ; ++i)
     {
-        initLayerTF[i] = tmp;
-        tmp += stepInit;
+        initLayerTF[i] = initLayerTF[i-1] + stepInit;
     }
 
     #pragma omp parallel for num_threads(2)
-    for(uint i = 0; i < selectZ; i++)
+    for(i = 0; i < selectZ; ++i)
     {
         TF[0][i] = initLayerTF[i];
     }
-
 }
 
 void initialLayerCV(vector <vector <double> > &CV)
 {
     double *initLayerCV = new double [selectZ];
+    double stepInit = 0.0;
+    size_t i = 0;
 
-    #pragma omp parallel for num_threads(4)
-    for(uint i = 0; i < selectN; i++)
+    #pragma omp parallel for num_threads(2)
+    for(i = 0; i < selectN; ++i)
     {
         CV[i][0] = initLayerCV_0;
-        initLayerCV[0] = initLayerCV_0;
         CV[i][selectZ-1] = initLayerCV_1;
     }
 
-    uint i = 0;
-    double tmp = 0.0;
-    double stepInit = 0.0;
-
     stepInit = abs(initLayerCV_0-initLayerCV_1)/(selectZ-2);
-    tmp = initLayerCV_0+stepInit;
+
+    initLayerCV[0] = initLayerCV_0;
     initLayerCV[1] = initLayerCV_0;
     initLayerCV[selectZ-1] = initLayerCV_1;
 
-    #pragma omp parallel for num_threads(2)
     for(i = 2; i < selectZ; ++i)
     {
-        initLayerCV[i] = tmp;
-        tmp += stepInit;
+        initLayerCV[i] = initLayerCV[i-1] + stepInit;
     }
 
     #pragma omp parallel for num_threads(2)
-    for(uint i = 0; i < selectZ; i++)
+    for(i = 0; i < selectZ; ++i)
     {
         CV[0][i] = initLayerCV[i];
+        //printf("Thread %d\n", omp_get_thread_num());
     }
-
 }
 
 void initialLayerCF(vector <vector <double> > &CF)
 {
     double *initLayerCF = new double [selectZ];
+    double stepInit = 0.0;
+    size_t i = 0;
 
-    #pragma omp parallel for num_threads(4)
-    for(uint i = 0; i < selectN; i++)
+    #pragma omp parallel for num_threads(2)
+    for(i = 0; i < selectN; ++i)
     {
         CF[i][0] = initLayerCF_0;
-        initLayerCF[0] = initLayerCF_0;
         CF[i][selectZ-1] = initLayerCF_1;
     }
 
-    uint i = 0;
-    double tmp = 0.0;
-    double stepInit = 0.0;
-
     stepInit = abs(initLayerCF_0-initLayerCF_1)/(selectZ-2);
-    tmp = initLayerCF_0-stepInit;
+
+    initLayerCF[0] = initLayerCF_0;
     initLayerCF[1] = initLayerCF_0;
     initLayerCF[selectZ-1] = initLayerCF_1;
 
-    #pragma omp parallel for num_threads(2)
     for(i = 2; i < selectZ; ++i)
     {
-        initLayerCF[i] = tmp;
-        tmp -= stepInit;
+        initLayerCF[i] = initLayerCF[i-1] - stepInit;
     }
 
     #pragma omp parallel for num_threads(2)
-    for(uint i = 0; i < selectZ; i++)
+    for(i = 0; i < selectZ; ++i)
     {
         CF[0][i] = initLayerCF[i];
     }
-
 }
 
 void MainWindow::toFileMM(vector <vector <double> > MMM, string nameModel)
@@ -893,7 +904,7 @@ void MainWindow::toFileMM(vector <vector <double> > MMM, string nameModel)
 
     ofstream foutMM(nameModel, ios_base::out | ios_base::trunc);
 
-    for(uint i = 0; i < selectN; i++)
+    for(size_t i = 0; i < selectN; i++)
     {
         for(uint j = 0; j < selectZ; j++)
         {
@@ -906,7 +917,7 @@ void MainWindow::toFileMM(vector <vector <double> > MMM, string nameModel)
 
 void MainWindow::on_CouiceZspinBox_valueChanged(int valueChanged)
 {
-    selectZ = (uint)(valueChanged + 2);
+    selectZ = static_cast <unsigned int> (valueChanged + 2);
 }
 
 void MainWindow::on_lineEdit_editingFinished()
