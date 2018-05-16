@@ -22,9 +22,11 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QProgressBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QSpinBox>
+#include <QtWidgets/QSplitter>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -38,15 +40,11 @@ public:
     QAction *action_3;
     QWidget *centralWidget;
     QFrame *line;
-    QLabel *label;
     QLabel *outputGraph;
     QFrame *line_4;
-    QLabel *label_11;
-    QLabel *label_12;
-    QLabel *label_13;
-    QFrame *line_2;
     QWidget *verticalLayoutWidget_2;
     QVBoxLayout *verticalLayout_4;
+    QLabel *label;
     QHBoxLayout *horizontalLayout_5;
     QHBoxLayout *horizontalLayout_6;
     QLabel *label_5;
@@ -93,13 +91,36 @@ public:
     QPushButton *clear;
     QPushButton *save;
     QPushButton *exit;
+    QFrame *line_7;
+    QSplitter *splitter_3;
+    QSplitter *splitter_2;
+    QSplitter *splitter;
+    QWidget *layoutWidget;
+    QHBoxLayout *horizontalLayout_13;
+    QLabel *label_11;
+    QVBoxLayout *verticalLayout_8;
+    QLabel *label_12;
+    QLabel *label_13;
+    QWidget *layoutWidget1;
+    QVBoxLayout *verticalLayout_7;
+    QHBoxLayout *horizontalLayout_10;
     QLineEdit *valV1;
     QLineEdit *valV2;
     QLineEdit *valV3;
-    QLineEdit *valF2;
+    QHBoxLayout *horizontalLayout_12;
     QLineEdit *valF1;
+    QLineEdit *valF2;
     QLineEdit *valF3;
-    QFrame *line_7;
+    QWidget *layoutWidget2;
+    QVBoxLayout *verticalLayout_9;
+    QFrame *line_8;
+    QHBoxLayout *horizontalLayout_9;
+    QLabel *label_19;
+    QProgressBar *progressBar_calculating;
+    QLabel *label_14;
+    QProgressBar *progressBar_drawing;
+    QWidget *layoutWidget3;
+    QVBoxLayout *verticalLayout_6;
     QLabel *label_8;
     QLineEdit *selectStep;
     QMenuBar *menuBar;
@@ -110,7 +131,13 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(849, 548);
+        MainWindow->resize(849, 562);
+        QSizePolicy sizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(MainWindow->sizePolicy().hasHeightForWidth());
+        MainWindow->setSizePolicy(sizePolicy);
+        MainWindow->setMaximumSize(QSize(849, 700));
         action = new QAction(MainWindow);
         action->setObjectName(QStringLiteral("action"));
         action_3 = new QAction(MainWindow);
@@ -119,43 +146,30 @@ public:
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         line = new QFrame(centralWidget);
         line->setObjectName(QStringLiteral("line"));
-        line->setGeometry(QRect(550, 20, 20, 391));
+        line->setGeometry(QRect(543, 10, 20, 391));
         line->setFrameShape(QFrame::VLine);
         line->setFrameShadow(QFrame::Sunken);
-        label = new QLabel(centralWidget);
-        label->setObjectName(QStringLiteral("label"));
-        label->setGeometry(QRect(670, 0, 81, 21));
         outputGraph = new QLabel(centralWidget);
         outputGraph->setObjectName(QStringLiteral("outputGraph"));
-        outputGraph->setGeometry(QRect(20, 30, 531, 371));
+        outputGraph->setGeometry(QRect(13, 20, 531, 371));
         line_4 = new QFrame(centralWidget);
         line_4->setObjectName(QStringLiteral("line_4"));
-        line_4->setGeometry(QRect(10, 400, 551, 20));
+        line_4->setGeometry(QRect(3, 390, 551, 20));
         line_4->setFrameShape(QFrame::HLine);
         line_4->setFrameShadow(QFrame::Sunken);
-        label_11 = new QLabel(centralWidget);
-        label_11->setObjectName(QStringLiteral("label_11"));
-        label_11->setGeometry(QRect(10, 420, 131, 51));
-        label_12 = new QLabel(centralWidget);
-        label_12->setObjectName(QStringLiteral("label_12"));
-        label_12->setGeometry(QRect(140, 420, 91, 20));
-        label_12->setStyleSheet(QStringLiteral(""));
-        label_13 = new QLabel(centralWidget);
-        label_13->setObjectName(QStringLiteral("label_13"));
-        label_13->setGeometry(QRect(140, 450, 111, 20));
-        line_2 = new QFrame(centralWidget);
-        line_2->setObjectName(QStringLiteral("line_2"));
-        line_2->setGeometry(QRect(560, 10, 281, 20));
-        line_2->setFrameShape(QFrame::HLine);
-        line_2->setFrameShadow(QFrame::Sunken);
         verticalLayoutWidget_2 = new QWidget(centralWidget);
         verticalLayoutWidget_2->setObjectName(QStringLiteral("verticalLayoutWidget_2"));
-        verticalLayoutWidget_2->setGeometry(QRect(580, 30, 251, 461));
+        verticalLayoutWidget_2->setGeometry(QRect(573, 0, 256, 493));
         verticalLayout_4 = new QVBoxLayout(verticalLayoutWidget_2);
         verticalLayout_4->setSpacing(6);
         verticalLayout_4->setContentsMargins(11, 11, 11, 11);
         verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
         verticalLayout_4->setContentsMargins(0, 0, 0, 0);
+        label = new QLabel(verticalLayoutWidget_2);
+        label->setObjectName(QStringLiteral("label"));
+
+        verticalLayout_4->addWidget(label);
+
         horizontalLayout_5 = new QHBoxLayout();
         horizontalLayout_5->setSpacing(6);
         horizontalLayout_5->setObjectName(QStringLiteral("horizontalLayout_5"));
@@ -383,11 +397,11 @@ public:
 
         Hexch = new QRadioButton(verticalLayoutWidget_2);
         Hexch->setObjectName(QStringLiteral("Hexch"));
-        QSizePolicy sizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(Hexch->sizePolicy().hasHeightForWidth());
-        Hexch->setSizePolicy(sizePolicy);
+        QSizePolicy sizePolicy1(QSizePolicy::Maximum, QSizePolicy::Fixed);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(Hexch->sizePolicy().hasHeightForWidth());
+        Hexch->setSizePolicy(sizePolicy1);
         Hexch->setMinimumSize(QSize(55, 20));
         Hexch->setMaximumSize(QSize(300, 22));
         QFont font;
@@ -442,48 +456,198 @@ public:
 
         verticalLayout_4->addLayout(verticalLayout);
 
-        valV1 = new QLineEdit(centralWidget);
-        valV1->setObjectName(QStringLiteral("valV1"));
-        valV1->setGeometry(QRect(260, 420, 61, 20));
-        valV1->setMaximumSize(QSize(100, 16777215));
-        valV1->setReadOnly(true);
-        valV2 = new QLineEdit(centralWidget);
-        valV2->setObjectName(QStringLiteral("valV2"));
-        valV2->setGeometry(QRect(330, 420, 61, 20));
-        valV2->setMaximumSize(QSize(100, 16777215));
-        valV2->setReadOnly(true);
-        valV3 = new QLineEdit(centralWidget);
-        valV3->setObjectName(QStringLiteral("valV3"));
-        valV3->setGeometry(QRect(400, 420, 61, 20));
-        valV3->setMaximumSize(QSize(100, 16777215));
-        valV3->setReadOnly(true);
-        valF2 = new QLineEdit(centralWidget);
-        valF2->setObjectName(QStringLiteral("valF2"));
-        valF2->setGeometry(QRect(330, 450, 61, 20));
-        valF2->setMaximumSize(QSize(100, 16777215));
-        valF2->setReadOnly(true);
-        valF1 = new QLineEdit(centralWidget);
-        valF1->setObjectName(QStringLiteral("valF1"));
-        valF1->setGeometry(QRect(260, 450, 61, 20));
-        valF1->setMaximumSize(QSize(100, 16777215));
-        valF1->setReadOnly(true);
-        valF3 = new QLineEdit(centralWidget);
-        valF3->setObjectName(QStringLiteral("valF3"));
-        valF3->setGeometry(QRect(400, 450, 61, 20));
-        valF3->setMaximumSize(QSize(100, 16777215));
-        valF3->setReadOnly(true);
         line_7 = new QFrame(centralWidget);
         line_7->setObjectName(QStringLiteral("line_7"));
-        line_7->setGeometry(QRect(10, 10, 551, 20));
+        line_7->setGeometry(QRect(3, 0, 551, 20));
         line_7->setFrameShape(QFrame::HLine);
         line_7->setFrameShadow(QFrame::Sunken);
-        label_8 = new QLabel(centralWidget);
+        splitter_3 = new QSplitter(centralWidget);
+        splitter_3->setObjectName(QStringLiteral("splitter_3"));
+        splitter_3->setGeometry(QRect(0, 410, 571, 81));
+        splitter_3->setOrientation(Qt::Horizontal);
+        splitter_2 = new QSplitter(splitter_3);
+        splitter_2->setObjectName(QStringLiteral("splitter_2"));
+        splitter_2->setOrientation(Qt::Vertical);
+        splitter = new QSplitter(splitter_2);
+        splitter->setObjectName(QStringLiteral("splitter"));
+        splitter->setOrientation(Qt::Horizontal);
+        layoutWidget = new QWidget(splitter);
+        layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
+        horizontalLayout_13 = new QHBoxLayout(layoutWidget);
+        horizontalLayout_13->setSpacing(6);
+        horizontalLayout_13->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_13->setObjectName(QStringLiteral("horizontalLayout_13"));
+        horizontalLayout_13->setContentsMargins(0, 0, 0, 0);
+        label_11 = new QLabel(layoutWidget);
+        label_11->setObjectName(QStringLiteral("label_11"));
+
+        horizontalLayout_13->addWidget(label_11);
+
+        verticalLayout_8 = new QVBoxLayout();
+        verticalLayout_8->setSpacing(6);
+        verticalLayout_8->setObjectName(QStringLiteral("verticalLayout_8"));
+        label_12 = new QLabel(layoutWidget);
+        label_12->setObjectName(QStringLiteral("label_12"));
+        label_12->setStyleSheet(QStringLiteral(""));
+
+        verticalLayout_8->addWidget(label_12);
+
+        label_13 = new QLabel(layoutWidget);
+        label_13->setObjectName(QStringLiteral("label_13"));
+
+        verticalLayout_8->addWidget(label_13);
+
+
+        horizontalLayout_13->addLayout(verticalLayout_8);
+
+        splitter->addWidget(layoutWidget);
+        layoutWidget1 = new QWidget(splitter);
+        layoutWidget1->setObjectName(QStringLiteral("layoutWidget1"));
+        verticalLayout_7 = new QVBoxLayout(layoutWidget1);
+        verticalLayout_7->setSpacing(6);
+        verticalLayout_7->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_7->setObjectName(QStringLiteral("verticalLayout_7"));
+        verticalLayout_7->setContentsMargins(0, 0, 0, 0);
+        horizontalLayout_10 = new QHBoxLayout();
+        horizontalLayout_10->setSpacing(6);
+        horizontalLayout_10->setObjectName(QStringLiteral("horizontalLayout_10"));
+        valV1 = new QLineEdit(layoutWidget1);
+        valV1->setObjectName(QStringLiteral("valV1"));
+        valV1->setMaximumSize(QSize(100, 16777215));
+        valV1->setReadOnly(true);
+
+        horizontalLayout_10->addWidget(valV1);
+
+        valV2 = new QLineEdit(layoutWidget1);
+        valV2->setObjectName(QStringLiteral("valV2"));
+        valV2->setMaximumSize(QSize(100, 16777215));
+        valV2->setReadOnly(true);
+
+        horizontalLayout_10->addWidget(valV2);
+
+        valV3 = new QLineEdit(layoutWidget1);
+        valV3->setObjectName(QStringLiteral("valV3"));
+        valV3->setMaximumSize(QSize(100, 16777215));
+        valV3->setReadOnly(true);
+
+        horizontalLayout_10->addWidget(valV3);
+
+
+        verticalLayout_7->addLayout(horizontalLayout_10);
+
+        horizontalLayout_12 = new QHBoxLayout();
+        horizontalLayout_12->setSpacing(6);
+        horizontalLayout_12->setObjectName(QStringLiteral("horizontalLayout_12"));
+        valF1 = new QLineEdit(layoutWidget1);
+        valF1->setObjectName(QStringLiteral("valF1"));
+        valF1->setMaximumSize(QSize(100, 16777215));
+        valF1->setReadOnly(true);
+
+        horizontalLayout_12->addWidget(valF1);
+
+        valF2 = new QLineEdit(layoutWidget1);
+        valF2->setObjectName(QStringLiteral("valF2"));
+        valF2->setMaximumSize(QSize(100, 16777215));
+        valF2->setReadOnly(true);
+
+        horizontalLayout_12->addWidget(valF2);
+
+        valF3 = new QLineEdit(layoutWidget1);
+        valF3->setObjectName(QStringLiteral("valF3"));
+        valF3->setMaximumSize(QSize(100, 16777215));
+        valF3->setReadOnly(true);
+
+        horizontalLayout_12->addWidget(valF3);
+
+
+        verticalLayout_7->addLayout(horizontalLayout_12);
+
+        splitter->addWidget(layoutWidget1);
+        splitter_2->addWidget(splitter);
+        layoutWidget2 = new QWidget(splitter_2);
+        layoutWidget2->setObjectName(QStringLiteral("layoutWidget2"));
+        verticalLayout_9 = new QVBoxLayout(layoutWidget2);
+        verticalLayout_9->setSpacing(6);
+        verticalLayout_9->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_9->setObjectName(QStringLiteral("verticalLayout_9"));
+        verticalLayout_9->setContentsMargins(0, 0, 0, 0);
+        line_8 = new QFrame(layoutWidget2);
+        line_8->setObjectName(QStringLiteral("line_8"));
+        line_8->setFrameShape(QFrame::HLine);
+        line_8->setFrameShadow(QFrame::Sunken);
+
+        verticalLayout_9->addWidget(line_8);
+
+        horizontalLayout_9 = new QHBoxLayout();
+        horizontalLayout_9->setSpacing(6);
+        horizontalLayout_9->setObjectName(QStringLiteral("horizontalLayout_9"));
+        label_19 = new QLabel(layoutWidget2);
+        label_19->setObjectName(QStringLiteral("label_19"));
+        label_19->setMinimumSize(QSize(0, 20));
+        label_19->setMaximumSize(QSize(129, 16777215));
+
+        horizontalLayout_9->addWidget(label_19);
+
+        progressBar_calculating = new QProgressBar(layoutWidget2);
+        progressBar_calculating->setObjectName(QStringLiteral("progressBar_calculating"));
+        QSizePolicy sizePolicy2(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(progressBar_calculating->sizePolicy().hasHeightForWidth());
+        progressBar_calculating->setSizePolicy(sizePolicy2);
+        progressBar_calculating->setMaximumSize(QSize(80, 16777215));
+        progressBar_calculating->setValue(0);
+
+        horizontalLayout_9->addWidget(progressBar_calculating);
+
+        label_14 = new QLabel(layoutWidget2);
+        label_14->setObjectName(QStringLiteral("label_14"));
+        label_14->setMaximumSize(QSize(133, 16777215));
+
+        horizontalLayout_9->addWidget(label_14);
+
+        progressBar_drawing = new QProgressBar(layoutWidget2);
+        progressBar_drawing->setObjectName(QStringLiteral("progressBar_drawing"));
+        sizePolicy2.setHeightForWidth(progressBar_drawing->sizePolicy().hasHeightForWidth());
+        progressBar_drawing->setSizePolicy(sizePolicy2);
+        progressBar_drawing->setMaximumSize(QSize(80, 16777215));
+        progressBar_drawing->setValue(0);
+
+        horizontalLayout_9->addWidget(progressBar_drawing);
+
+
+        verticalLayout_9->addLayout(horizontalLayout_9);
+
+        splitter_2->addWidget(layoutWidget2);
+        splitter_3->addWidget(splitter_2);
+        layoutWidget3 = new QWidget(splitter_3);
+        layoutWidget3->setObjectName(QStringLiteral("layoutWidget3"));
+        verticalLayout_6 = new QVBoxLayout(layoutWidget3);
+        verticalLayout_6->setSpacing(6);
+        verticalLayout_6->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_6->setObjectName(QStringLiteral("verticalLayout_6"));
+        verticalLayout_6->setContentsMargins(0, 0, 0, 0);
+        label_8 = new QLabel(layoutWidget3);
         label_8->setObjectName(QStringLiteral("label_8"));
-        label_8->setGeometry(QRect(480, 420, 91, 41));
-        selectStep = new QLineEdit(centralWidget);
+
+        verticalLayout_6->addWidget(label_8);
+
+        selectStep = new QLineEdit(layoutWidget3);
         selectStep->setObjectName(QStringLiteral("selectStep"));
-        selectStep->setGeometry(QRect(490, 470, 71, 21));
+        sizePolicy2.setHeightForWidth(selectStep->sizePolicy().hasHeightForWidth());
+        selectStep->setSizePolicy(sizePolicy2);
+        selectStep->setMaximumSize(QSize(100, 16777215));
+
+        verticalLayout_6->addWidget(selectStep);
+
+        splitter_3->addWidget(layoutWidget3);
         MainWindow->setCentralWidget(centralWidget);
+        splitter_3->raise();
+        line->raise();
+        outputGraph->raise();
+        line_4->raise();
+        verticalLayoutWidget_2->raise();
+        line_7->raise();
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
         menuBar->setGeometry(QRect(0, 0, 849, 20));
@@ -512,11 +676,8 @@ public:
 #endif // QT_NO_TOOLTIP
         action->setText(QApplication::translate("MainWindow", "\320\241\320\276\321\205\321\200\320\260\320\275\320\270\321\202\321\214 \320\272\320\260\321\200\321\202\320\270\320\275\320\272\321\203", 0));
         action_3->setText(QApplication::translate("MainWindow", "\320\222\321\213\321\205\320\276\320\264", 0));
-        label->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" font-size:9pt; font-weight:600;\">\320\235\320\260\321\201\321\202\321\200\320\276\320\271\320\272\320\260:</span></p></body></html>", 0));
         outputGraph->setText(QApplication::translate("MainWindow", "TextLabel", 0));
-        label_11->setText(QApplication::translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:9pt; font-weight:600;\">\320\243\321\201\321\202\320\260\320\275\320\276\320\262\320\270\320\262\321\210\320\270\320\265\321\201\321\217</span></p><p align=\"center\"><span style=\" font-size:9pt; font-weight:600;\">\320\267\320\275\320\260\321\207\320\265\320\275\320\270\321\217:</span></p></body></html>", 0));
-        label_12->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" font-size:9pt; color:#299d32;\">\320\237\320\260\321\200\320\276\320\262\320\260\321\217 \321\204\320\260\320\267\320\260:</span></p></body></html>", 0));
-        label_13->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" font-size:9pt; color:#2677cd;\">\320\226\320\270\320\264\320\272\320\276\321\201\321\202\320\275\320\260\321\217 \321\204\320\260\320\267\320\260:</span></p></body></html>", 0));
+        label->setText(QApplication::translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:9pt; font-weight:600;\">\320\235\320\260\321\201\321\202\321\200\320\276\320\271\320\272\320\260 \320\277\320\260\321\200\320\260\320\274\320\265\321\202\321\200\320\276\320\262 \320\274\320\276\320\264\320\265\320\273\320\270\321\200\320\276\320\262\320\260\320\275\320\270\321\217:</span></p></body></html>", 0));
         label_5->setText(QApplication::translate("MainWindow", "T, 'C \320\270\320\273\320\270 \320\241, % = [", 0));
         inputLeftY->setText(QApplication::translate("MainWindow", "100", 0));
         label_6->setText(QApplication::translate("MainWindow", ",", 0));
@@ -545,12 +706,17 @@ public:
         clear->setText(QApplication::translate("MainWindow", "\320\236\321\207\320\270\321\201\321\202\320\270\321\202\321\214 \320\274\320\276\320\275\320\270\321\202\320\276\321\200", 0));
         save->setText(QApplication::translate("MainWindow", "\320\241\320\276\321\205\321\200\320\260\320\275\320\270\321\202\321\214", 0));
         exit->setText(QApplication::translate("MainWindow", "\320\222\321\213\320\271\321\202\320\270", 0));
+        label_11->setText(QApplication::translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:9pt; font-weight:600;\">\320\243\321\201\321\202\320\260\320\275\320\276\320\262\320\270\320\262\321\210\320\270\320\265\321\201\321\217</span></p><p align=\"center\"><span style=\" font-size:9pt; font-weight:600;\">\320\267\320\275\320\260\321\207\320\265\320\275\320\270\321\217:</span></p></body></html>", 0));
+        label_12->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" font-size:9pt; color:#299d32;\">\320\237\320\260\321\200\320\276\320\262\320\260\321\217 \321\204\320\260\320\267\320\260:</span></p></body></html>", 0));
+        label_13->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" font-size:9pt; color:#2677cd;\">\320\226\320\270\320\264\320\272\320\276\321\201\321\202\320\275\320\260\321\217 \321\204\320\260\320\267\320\260:</span></p></body></html>", 0));
         valV1->setText(QApplication::translate("MainWindow", "0.0", 0));
         valV2->setText(QApplication::translate("MainWindow", "0.0", 0));
         valV3->setText(QApplication::translate("MainWindow", "0.0", 0));
-        valF2->setText(QApplication::translate("MainWindow", "0.0", 0));
         valF1->setText(QApplication::translate("MainWindow", "0.0", 0));
+        valF2->setText(QApplication::translate("MainWindow", "0.0", 0));
         valF3->setText(QApplication::translate("MainWindow", "0.0", 0));
+        label_19->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">\320\237\321\200\320\276\321\206\320\265\321\201\321\201 \320\262\321\213\321\207\320\270\321\201\320\273\320\265\320\275 \320\275\320\260: </span></p></body></html>", 0));
+        label_14->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">\320\223\321\200\320\260\321\204\320\270\320\272 \320\276\321\202\321\200\320\270\321\201\320\276\320\262\320\260\320\275 \320\275\320\260: </span></p></body></html>", 0));
         label_8->setText(QApplication::translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">\320\250\320\260\320\263</span></p><p align=\"center\"><span style=\" font-weight:600;\">\320\264\320\270\321\201\320\272\321\200\320\265\321\202\320\270\320\267\320\260\321\206\320\270\320\270:</span></p></body></html>", 0));
         selectStep->setText(QApplication::translate("MainWindow", "0.01", 0));
         menu->setTitle(QApplication::translate("MainWindow", "\320\244\320\260\320\271\320\273", 0));

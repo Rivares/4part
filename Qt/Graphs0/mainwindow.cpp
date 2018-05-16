@@ -217,21 +217,26 @@ void MainWindow::drawGraph(bool notEmpty)
 
     //----------------------------------------------------------------------
 
+    ui->progressBar_calculating->setRange(0, 1);
+
     if (ui->LHM->isChecked())
     {
         calculateMM(TV, TF);
+        ui->progressBar_calculating->setValue(1);   // Fake
         draw_Model(&graph, 0);
     }
 
     if (ui->NHM->isChecked())
     {
-        calculateMM(TV, TF, 1);        // OVERLOADING CALCULATE OF FUNCTION
+        calculateMM(TV, TF, 1);                     // OVERLOADING CALCULATE OF FUNCTION
+        ui->progressBar_calculating->setValue(1);   // Fake
         draw_Model(&graph, 0);
     }
 
     if((ui->Hexch->isChecked()) || (ui->Mexch->isChecked()))
     {
         calculateMM(TV, TF, CV, CF);
+        ui->progressBar_calculating->setValue(1);   // Fake
         if((ui->Hexch->isChecked()))
             draw_Model(&graph, 0);
         else
@@ -324,6 +329,8 @@ void MainWindow::draw_Model(QPixmap *graph, int choiceModel)
     // Draw functions
     paint.setRenderHint(QPainter::Antialiasing, true);
 
+    ui->progressBar_drawing->setRange(0, (static_cast <int> (rightX) - 1));
+
     #pragma omp parallel sections                               // parallel's sections
     {
         #pragma omp section
@@ -372,7 +379,7 @@ void MainWindow::draw_Model(QPixmap *graph, int choiceModel)
 
                         path.moveTo(buf_x, buf_y);              // We start drawing from this place
                     }
-
+                    ui->progressBar_drawing->setValue(static_cast <int> (i));
                 }
 
                 paint.drawPath(path);
@@ -426,6 +433,7 @@ void MainWindow::draw_Model(QPixmap *graph, int choiceModel)
 
                         path1.moveTo(buf_x, buf_y);
                     }
+                    ui->progressBar_drawing->setValue(static_cast <int> (i));
                 }
 
                 paint.drawPath(path1);
@@ -456,7 +464,7 @@ void MainWindow::draw_Model(QPixmap *graph, int choiceModel)
 
     vector<double> TimePoints;                                          // 5 - it's number time points display on graph in digital form
     for (uint i = 0; i < 5; ++i)
-        TimePoints.push_back( ((2*(i+1)-1)*rightX)/10.0 );           // (2*(i+1)-1) - formula odd numbers; 10.0 - it's number time points on graph
+        TimePoints.push_back( ((2*(i+1)-1)*rightX)/10.0 );              // (2*(i+1)-1) - formula odd numbers; 10.0 - it's number time points on graph
 
     //----------------------------------------------------------------------
 
@@ -551,6 +559,9 @@ void MainWindow::on_LHM_clicked()
 
     leftY = ui->inputLeftY->text().toDouble();
     rightY = ui->inputRightY->text().toDouble();
+
+    ui->progressBar_calculating->setValue(0);   // Fake
+    ui->progressBar_drawing->setValue(0);
 }
 
 void MainWindow::on_NHM_clicked()
@@ -566,6 +577,9 @@ void MainWindow::on_NHM_clicked()
 
     leftY = ui->inputLeftY->text().toDouble();
     rightY = ui->inputRightY->text().toDouble();
+
+    ui->progressBar_calculating->setValue(0);   // Fake
+    ui->progressBar_drawing->setValue(0);
 }
 
 void MainWindow::on_Hexch_clicked()
@@ -581,6 +595,9 @@ void MainWindow::on_Hexch_clicked()
 
     leftY = ui->inputLeftY->text().toDouble();
     rightY = ui->inputRightY->text().toDouble();
+
+    ui->progressBar_calculating->setValue(0);   // Fake
+    ui->progressBar_drawing->setValue(0);
 }
 
 void MainWindow::on_Mexch_clicked()
@@ -596,6 +613,9 @@ void MainWindow::on_Mexch_clicked()
 
     leftY = ui->inputLeftY->text().toDouble();
     rightY = ui->inputRightY->text().toDouble();
+
+    ui->progressBar_calculating->setValue(0);   // Fake
+    ui->progressBar_drawing->setValue(0);
 }
 
 //---------------------------INTERCONNECTED MODEL!!!------------------------------
@@ -664,7 +684,6 @@ void calculateMM(vector <vector <double> > &TV, vector <vector <double> > &TF,
            CF[i][j] = -CF[i-1][j] * (PTF - 1 - (dt*RfM*E)) + (PTF * CF[i-1][j-1]) - (dt * RfM * CV[i-1][(selectZ-1)-j]) + P_CF;
         }
     }
-
 }
 
 
